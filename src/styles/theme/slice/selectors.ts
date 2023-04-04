@@ -5,15 +5,14 @@ import { initialState } from '.';
 import { themes } from '../themes';
 import { isSystemDark } from '../utils';
 
-export const selectTheme = createSelector(
-  [(state: RootState) => state.theme || initialState],
-  theme => {
-    if (theme.selected === 'system') {
-      return isSystemDark ? themes.dark : themes.light;
-    }
-    return themes[theme.selected];
-  },
-);
+const selectSlice = (state: RootState) => state.theme || initialState;
+export const selectTheme = createSelector([selectSlice], themeState => {
+  const { selected } = themeState;
+  if (selected === 'system') {
+    return isSystemDark ? themes.dark : themes.light;
+  }
+  return themes[selected];
+});
 
 export const selectThemeKey = createSelector(
   [(state: RootState) => state.theme || initialState],

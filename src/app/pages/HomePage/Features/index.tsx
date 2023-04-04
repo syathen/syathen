@@ -5,7 +5,6 @@ import { Lead } from '../components/Lead';
 import { SubTitle } from '../components/SubTitle';
 import { P } from '../components/P';
 import { A } from 'app/components/A';
-import { GithubRepoForm } from './GithubRepoForm';
 import { ThemeSwitch } from './ThemeSwitch';
 import { LanguageSwitch } from './LanguageSwitch';
 import { ReactComponent as StateIcon } from './assets/state.svg';
@@ -61,7 +60,6 @@ export function Features() {
               debug. Type any github username below and see it in action with
               Redux Dev Tools.
             </P>
-            <GithubRepoForm />
           </Content>
         </Feature>
         <Feature>

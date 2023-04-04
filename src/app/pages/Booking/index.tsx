@@ -6,6 +6,7 @@ import { Stage } from './components/Stage';
 import { StageCenter } from './components/StageCenter';
 import { Form, FormField } from './components/Form';
 import { MapLocations, MapPeople, MapServices, MapTimes } from './utils';
+import { scheduleBooking } from 'utils/bookingUtils';
 
 import { LocationList, ServiceList, PeopleList } from './testData';
 
@@ -161,10 +162,15 @@ export default function Booking(): JSX.Element {
       {serviceSelection != null && (
         <Stage>
           <Title>Book your appointment</Title>
-          {/* <Form>
+          <Form>
             <FormField>
               <label htmlFor="date">Date</label>
-              <input type="date" name="date" id="date" />
+              <input
+                type="date"
+                name="date"
+                id="date"
+                onChange={e => setDateSelection(e.target.value)}
+              />
             </FormField>
             <FormField>
               <label htmlFor="time">Time</label>
@@ -178,7 +184,21 @@ export default function Booking(): JSX.Element {
               <label htmlFor="email">Email</label>
               <input type="email" name="email" id="email" />
             </FormField>
-          </Form> */}
+          </Form>
+          <input
+            type="submit"
+            value="Book"
+            onClick={() => {
+              scheduleBooking(
+                '01873A27BB2F364353D41C93B1mmm086378',
+                locationSelection.id,
+                personSelection.id,
+                serviceSelection.id,
+                dateSelection,
+                timeSelection,
+              );
+            }}
+          />
           <StageCenter>
             {MapTimes(TimeList.time, setTimeSelection, orderDetails)}
           </StageCenter>

@@ -1,9 +1,7 @@
-import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { NavBar } from 'app/components/NavBar';
-import { Masthead } from './Masthead';
-import { Features } from './Features';
 import { PageWrapper } from 'app/components/PageWrapper';
+import { emptyCompany } from 'utils/dbUtils';
 
 export function HomePage() {
   return (
@@ -16,7 +14,16 @@ export function HomePage() {
         />
       </Helmet>
       <NavBar />
-      <PageWrapper></PageWrapper>
+      <PageWrapper>
+        {
+          <button
+            style={{ marginTop: '200px' }}
+            onClick={() => emptyCompany("Jim's Trims", 'jimtrims@gmail.com')}
+          >
+            Empty Company
+          </button>
+        }
+      </PageWrapper>
     </>
   );
 }
