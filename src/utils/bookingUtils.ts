@@ -37,6 +37,7 @@ export async function scheduleBooking(
   locationId: string,
   serviceId: string,
   employeeId: string,
+  customerSelection: any,
   date: number,
   time: number,
 ) {
@@ -47,6 +48,7 @@ export async function scheduleBooking(
     locationId: locationId,
     serviceId: serviceId,
     employeeId: employeeId,
+    customer: customerSelection,
     date: date,
     time: time,
     createDate: Date.now(),

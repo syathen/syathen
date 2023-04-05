@@ -8,7 +8,7 @@ import { PageWrapper } from '../PageWrapper';
 export function NavBar() {
   return (
     <Wrapper>
-      <PageWrapper>
+      <PageWrapper style={{ width: '80%'}}>
         <Logo />
         <Nav />
       </PageWrapper>
@@ -20,7 +20,8 @@ const Wrapper = styled.header`
   box-shadow: 0 1px 0 0 ${p => p.theme.borderLight};
   height: ${StyleConstants.NAV_BAR_HEIGHT};
   display: flex;
-  position: fixed;
+  /* position: fixed; */
+  position: inherit;
   top: 0;
   width: 100%;
   background-color: ${p => p.theme.background};
@@ -37,7 +38,7 @@ const Wrapper = styled.header`
 
   ${PageWrapper} {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     justify-content: space-between;
   }
 `;

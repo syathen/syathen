@@ -6,7 +6,7 @@ import { ReactComponent as GithubIcon } from './assets/github-icon.svg';
 export function Nav() {
   return (
     <Wrapper>
-      <Item
+      {/* <Item
         href="https://cansahin.gitbook.io/react-boilerplate-cra-template/"
         target="_blank"
         title="Documentation Page"
@@ -23,7 +23,7 @@ export function Nav() {
       >
         <GithubIcon />
         Github
-      </Item>
+      </Item> */}
     </Wrapper>
   );
 }

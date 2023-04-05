@@ -103,6 +103,8 @@ export default function Booking(): JSX.Element {
   const [serviceSelection, setServiceSelection] = React.useState<any>(null);
   const [dateSelection, setDateSelection] = React.useState<any>(null);
   const [timeSelection, setTimeSelection] = React.useState<any>(null);
+  const [customerSelection, setCustomerSelection] = React.useState<any>({});
+  const [emailSelection, setEmailSelection] = React.useState<any>(null);
 
   return (
     <>
@@ -178,11 +180,24 @@ export default function Booking(): JSX.Element {
             </FormField>
             <FormField>
               <label htmlFor="name">Name</label>
-              <input type="text" name="name" id="name" />
+              <input
+                type="text"
+                name="name"
+                id="name"
+                onChange={e => {
+                  customerSelection.name = e.target.value;
+                  setCustomerSelection(customerSelection);
+                }}
+              />
             </FormField>
             <FormField>
               <label htmlFor="email">Email</label>
-              <input type="email" name="email" id="email" />
+              <input
+                type="email"
+                name="email"
+                id="email"
+                onChange={e => setEmailSelection(e.target.value)}
+              />
             </FormField>
           </Form>
           <input
@@ -190,10 +205,11 @@ export default function Booking(): JSX.Element {
             value="Book"
             onClick={() => {
               scheduleBooking(
-                '01873A27BB2F364353D41C93B1mmm086378',
+                '01873A27BB2F364353D41C93B1086378',
                 locationSelection.id,
                 personSelection.id,
                 serviceSelection.id,
+                customerSelection,
                 dateSelection,
                 timeSelection,
               );
@@ -205,12 +221,7 @@ export default function Booking(): JSX.Element {
         </Stage>
       )}
 
-      {console.log(
-        locationSelection,
-        personSelection,
-        serviceSelection,
-        orderDetails,
-      )}
+      {console.log(customerSelection)}
     </>
   );
 }
