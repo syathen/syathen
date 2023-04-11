@@ -36,25 +36,35 @@ export const MapAppointments = (
   return appointments.map((appointment: any) => {
     const time = () => {
       if (timeFormat === '12') {
-        return formatHours(appointment.time);
+        return formatHours(appointment.details.time.time);
       } else {
-        return appointment.time;
+        return appointment.details.time.time;
       }
     };
     const name = () => {
-      if (nameFormat === 'asc') {
-        return `${appointment.firstName} ${appointment.lastName}`;
+      if (!appointment.customer.first_name) {
+        if (appointment.customer.name) {
+          return appointment.customer.name;
+        } else {
+          return appointment.customer.email;
+        }
       } else {
-        return `${appointment.lastName}, ${appointment.firstName}`;
+        if (nameFormat === 'asc') {
+          return `${appointment.customer.first_name} ${appointment.customer.last_name}`;
+        } else {
+          return `${appointment.customer.last_name}, ${appointment.customer.first_name}`;
+        }
       }
     };
     return (
-      <Appointment key={appointment.id}>
+      <Appointment key={appointment.booking_id}>
         <tbody>
           <tr>
             <td title={time()}>{time()}</td>
             <td title={name()}>{name()}</td>
-            <td title={appointment.service}>{appointment.service}</td>
+            <td title={appointment.details.service.service_name}>
+              {appointment.details.service.service_name}
+            </td>
           </tr>
         </tbody>
       </Appointment>

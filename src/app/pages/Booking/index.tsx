@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { messages } from './messages';
+import axios from 'axios';
+
+import { BookingModel } from 'utils/model';
+import { NotFoundPage } from '../NotFoundPage/Loadable';
 
 import { Title } from './components/Title';
 import { Stage } from './components/Stage';
 import { StageCenter } from './components/StageCenter';
 import { Form, FormField } from './components/Form';
 import { MapLocations, MapPeople, MapServices, MapTimes } from './utils';
-import { scheduleBooking } from 'utils/bookingUtils';
-
-import { LocationList, ServiceList, PeopleList } from './testData';
+import { scheduleBooking, getCompanyAlias, getImage } from 'utils/bookingUtils';
 
 // 1st Screen with locations (skipped if only one location)
 // 2nd Screen with Professionals (skipped if only one professional)
@@ -88,16 +93,62 @@ const TimeList = {
 };
 
 let orderDetails = {
-  location: { currency_symbol: '$' },
+  location: { location_id: '', currency_symbol: '$' },
   professional: null,
   service: null,
   date: null,
   time: null,
-  customer: null,
+  customer: {
+    name: null,
+    first_name: null,
+    last_name: null,
+    email: null,
+    phone: null,
+    customer_id: null,
+    address: null,
+    is_user: null,
+    member_id: null,
+    member_type: null,
+    member_status: null,
+  },
   payment: null,
 };
 
+async function getLocations(companyId: string) {
+  const response = await axios.get(
+    `https://api.syathen.com/locations/${companyId}/`,
+  );
+  const data = await response.data;
+  return data;
+}
+
+async function getPeople(locationId: string) {
+  const response = await axios.get(
+    `https://api.syathen.com/employees/${locationId}/`,
+  );
+  const data = await response.data;
+  return data;
+}
+
+async function getService(service: string) {
+  const response = await axios.get(
+    `https://api.syathen.com/service/${service}/`,
+  );
+  const data = await response.data;
+  return data;
+}
+
 export default function Booking(): JSX.Element {
+  // get slug/handle from url
+  const { handle } = useParams<{ handle: string }>();
+
+  const notFound = React.useRef<boolean>(false);
+
+  const [companyId, setCompanyId] = React.useState<any>(null);
+  const [locationList, setLocationList] = React.useState<any>(null);
+  const [peopleList, setPeopleList] = React.useState<any>(null);
+  const [serviceList, setServiceList] = React.useState<any>(null);
+
   const [locationSelection, setLocationSelection] = React.useState<any>(null);
   const [personSelection, setPersonSelection] = React.useState<any>(null);
   const [serviceSelection, setServiceSelection] = React.useState<any>(null);
@@ -106,122 +157,210 @@ export default function Booking(): JSX.Element {
   const [customerSelection, setCustomerSelection] = React.useState<any>({});
   const [emailSelection, setEmailSelection] = React.useState<any>(null);
 
-  return (
-    <>
-      <Helmet titleTemplate="%s - brand">
-        <title>Book</title>
-        <meta name="description" content="Book your appointment" />
-      </Helmet>
+  const { t } = useTranslation();
 
-      {LocationList.location.length > 1 && locationSelection === null && (
-        <Stage>
-          {/* <Title>Pick a Spot!</Title> */}
-          <Title>Where are you looking for?</Title>
-          {MapLocations(
-            LocationList.location,
-            setLocationSelection,
-            orderDetails,
-          )}
-        </Stage>
-      )}
-
-      {LocationList.location.length <= 1 && locationSelection === null
-        ? setLocationSelection(LocationList.location[0])
-        : null}
-
-      {locationSelection != null &&
-        PeopleList.people.length > 1 &&
-        personSelection === null && (
-          <Stage>
-            {/* <Title>Pick a Person!</Title> */}
-            <Title>Who are you looking for?</Title>
-            {MapPeople(PeopleList.people, setPersonSelection, orderDetails)}
-          </Stage>
-        )}
-
-      {PeopleList.people.length <= 1 && personSelection === null
-        ? setPersonSelection(PeopleList.people[0])
-        : null}
-
-      {ServiceList.services.length > 1 &&
-        personSelection != null &&
-        serviceSelection === null && (
-          <Stage>
-            {/* <Title>Pick a Service!</Title> */}
-            <Title>What are you looking for?</Title>
-            {MapServices(
-              ServiceList.services,
-              setServiceSelection,
-              orderDetails,
-            )}
-          </Stage>
-        )}
-
-      {ServiceList.services.length <= 1 && serviceSelection === null
-        ? setServiceSelection(ServiceList.services[0])
-        : null}
-
-      {serviceSelection != null && (
-        <Stage>
-          <Title>Book your appointment</Title>
-          <Form>
-            <FormField>
-              <label htmlFor="date">Date</label>
-              <input
-                type="date"
-                name="date"
-                id="date"
-                onChange={e => setDateSelection(e.target.value)}
-              />
-            </FormField>
-            <FormField>
-              <label htmlFor="time">Time</label>
-              <input type="time" name="time" id="time" />
-            </FormField>
-            <FormField>
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                onChange={e => {
-                  customerSelection.name = e.target.value;
-                  setCustomerSelection(customerSelection);
-                }}
-              />
-            </FormField>
-            <FormField>
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                onChange={e => setEmailSelection(e.target.value)}
-              />
-            </FormField>
-          </Form>
-          <input
-            type="submit"
-            value="Book"
-            onClick={() => {
-              scheduleBooking(
-                '01873A27BB2F364353D41C93B1086378',
-                locationSelection.id,
-                personSelection.id,
-                serviceSelection.id,
-                customerSelection,
-                dateSelection,
-                timeSelection,
-              );
-            }}
-          />
-          <StageCenter>
-            {MapTimes(TimeList.time, setTimeSelection, orderDetails)}
-          </StageCenter>
-        </Stage>
-      )}
-
-      {console.log(customerSelection)}
-    </>
+  const setLocation = React.useCallback(
+    (location: any) => {
+      setLocationSelection(location);
+      orderDetails.location = location;
+    },
+    [setLocationSelection],
   );
+
+  const setPerson = React.useCallback(
+    (person: any) => {
+      setPersonSelection(person);
+      orderDetails.professional = person;
+    },
+    [setPersonSelection],
+  );
+
+  React.useEffect(() => {
+    if (!companyId) {
+      if (handle) {
+        getCompanyAlias(handle)
+          .then(compId => {
+            if (compId) {
+              setCompanyId(compId);
+              notFound.current = false;
+            } else {
+              console.log('No company found for %s', handle);
+              notFound.current = true;
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
+    }
+    if (companyId && !locationSelection && !locationList) {
+      getLocations(companyId).then(res => {
+        if (res) {
+          if (res.length === 1) {
+            setLocationSelection(res[0]);
+            setLocationList(res);
+          } else {
+            setLocationList(res);
+          }
+        }
+      });
+    }
+    if (companyId && locationSelection && !personSelection && !peopleList) {
+      getPeople(locationSelection.location_id)
+        .then(pplres => {
+          if (pplres) {
+            if (pplres.length === 1) {
+              setPersonSelection(pplres[0]);
+              setPeopleList(pplres);
+            } else {
+              setPeopleList(pplres);
+            }
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+    if (
+      companyId &&
+      locationSelection &&
+      personSelection &&
+      !serviceSelection &&
+      !serviceList
+    ) {
+      if (!serviceList) {
+        if (personSelection.services.length === 1) {
+          getService(personSelection.services[0])
+            .then(servres => {
+              if (servres) {
+                setServiceSelection(servres);
+                setServiceList(servres);
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        } else {
+          setServiceList([]);
+          personSelection.services.forEach((service: any) => {
+            getService(service)
+              .then(servres => {
+                if (servres) {
+                  setServiceList(serviceList => [...serviceList, servres]);
+                }
+              })
+              .catch(err => {
+                console.log(err);
+              });
+          });
+        }
+      }
+    }
+  }, [
+    companyId,
+    handle,
+    locationList,
+    locationSelection,
+    peopleList,
+    personSelection,
+    serviceList,
+    serviceSelection,
+  ]);
+
+  if (!notFound.current) {
+    return (
+      <>
+        <Helmet titleTemplate={'%s - ' + handle}>
+          {/* <title>{t(messages.privacyPolicy())}</title> */}
+          <title>Book</title>
+          <meta name="description" content="Book your appointment" />
+        </Helmet>
+
+        {notFound.current && <NotFoundPage />}
+
+        {companyId && locationList && !locationSelection && (
+          <Stage>
+            <Title>Where are you looking for?</Title>
+            {MapLocations(locationList, setLocation, orderDetails)}
+          </Stage>
+        )}
+
+        {companyId && locationSelection && peopleList && !personSelection && (
+          <Stage>
+            <Title>Who are you looking for?</Title>
+            {MapPeople(peopleList, setPerson, orderDetails)}
+          </Stage>
+        )}
+
+        {companyId && personSelection && serviceList && !serviceSelection && (
+          <Stage>
+            <Title>What are you looking for?</Title>
+            {MapServices(serviceList, setServiceSelection, orderDetails)}
+          </Stage>
+        )}
+
+        {companyId && locationSelection && personSelection && serviceSelection && (
+          <Stage>
+            <Title>Book your appointment</Title>
+            <Form>
+              <FormField>
+                <label htmlFor="date">Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  id="date"
+                  onChange={e => setDateSelection(e.target.value)}
+                />
+              </FormField>
+              <FormField>
+                <label htmlFor="time">Time</label>
+                <input type="time" name="time" id="time" />
+              </FormField>
+              <FormField>
+                <label htmlFor="name">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  onChange={e => {
+                    customerSelection.name = e.target.value;
+                    setCustomerSelection(customerSelection);
+                  }}
+                />
+              </FormField>
+              <FormField>
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  onChange={e => setEmailSelection(e.target.value)}
+                />
+              </FormField>
+            </Form>
+            <input
+              type="submit"
+              value="Book"
+              onClick={() => {
+                scheduleBooking(
+                  companyId,
+                  locationSelection,
+                  personSelection,
+                  serviceSelection,
+                  customerSelection,
+                  dateSelection,
+                  timeSelection,
+                );
+              }}
+            />
+            <StageCenter>
+              {MapTimes(TimeList.time, setTimeSelection, orderDetails)}
+            </StageCenter>
+          </Stage>
+        )}
+      </>
+    );
+  } else {
+    return <NotFoundPage />;
+  }
 }

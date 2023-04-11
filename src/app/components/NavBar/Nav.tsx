@@ -1,57 +1,81 @@
 import * as React from 'react';
 import styled from 'styled-components/macro';
-import { ReactComponent as DocumentationIcon } from './assets/documentation-icon.svg';
-import { ReactComponent as GithubIcon } from './assets/github-icon.svg';
+import { media } from 'styles/media';
 
 export function Nav() {
   return (
     <Wrapper>
-      {/* <Item
-        href="https://cansahin.gitbook.io/react-boilerplate-cra-template/"
-        target="_blank"
-        title="Documentation Page"
+      <SignInButton
+        className="nav-sign-in"
+        href="/signin"
+        // target="_blank"
+        title="Sign In"
         rel="noopener noreferrer"
       >
-        <DocumentationIcon />
-        Documentation
-      </Item>
-      <Item
-        href="https://github.com/react-boilerplate/react-boilerplate-cra-template"
-        target="_blank"
-        title="Github Page"
+        Sign In
+      </SignInButton>
+      <SignUpButton
+        className="nav-sign-up"
+        href="/signup"
+        // target="_blank"
+        title="Sign Up"
         rel="noopener noreferrer"
       >
-        <GithubIcon />
-        Github
-      </Item> */}
+        Sign Up
+      </SignUpButton>
     </Wrapper>
   );
 }
 
 const Wrapper = styled.nav`
   display: flex;
-  margin-right: -1rem;
+  margin-left: 1rem;
 `;
 
-const Item = styled.a`
-  color: ${p => p.theme.primary};
+const SignUpButton = styled.a`
+  color: ${p => p.theme.background};
   cursor: pointer;
   text-decoration: none;
   display: flex;
-  padding: 0.25rem 1rem;
+  height: 2rem;
+  padding: 0.5rem;
+  margin: 1rem 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
   align-items: center;
+  background-color: ${p => p.theme.promptRed};
+  border-radius: 0.5rem;
+
+  ${media.small} {
+    margin: 1rem 0.5rem;
+    padding: 0.5rem;
+  }
 
   &:hover {
     opacity: 0.8;
   }
+`;
 
-  &:active {
-    opacity: 0.4;
+const SignInButton = styled.a`
+  color: ${p => p.theme.background};
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  height: 2rem;
+  padding: 0.5rem;
+  margin: 1rem 0rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-items: center;
+  background-color: ${p => p.theme.text};
+  border-radius: 0.5rem;
+
+  ${media.small} {
+    margin: 1rem 0.5rem;
+    padding: 0.5rem;
   }
 
-  .icon {
-    margin-right: 0.25rem;
+  &:hover {
+    opacity: 0.8;
   }
 `;
