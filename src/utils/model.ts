@@ -60,3 +60,87 @@ export type BookingModel = {
     };
   };
 };
+
+export type EmployeeModel = {
+  employee_id: string;
+  company_id: string;
+  name: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  image: string | null;
+  extra: any | null;
+  account: {
+    is_active: boolean;
+    is_verified: boolean;
+    is_admin: boolean;
+    is_owner: boolean;
+    is_manager: boolean;
+    is_employee: boolean;
+  };
+  meta: {
+    create_date: string;
+    update_date: string;
+    is_active: boolean;
+  };
+};
+
+export type LocationModel = {
+  location_id: string;
+  company_id: string;
+  name: string;
+  address: {
+    street_first: string;
+    street_second: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  } | null;
+  phone: string | null;
+  email: string | null;
+  image: string | null;
+  extra: any | null;
+  meta: {
+    create_date: string;
+    update_date: string;
+    is_active: boolean;
+  };
+};
+
+export type ServiceModel = {
+  service_id: string;
+  company_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  duration: number;
+  image: string | null;
+  request: string;
+  extra: any;
+  meta: {
+    create_date: string;
+    update_date: string;
+    is_active: boolean;
+  };
+};
+
+export type UserModel = {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string | null;
+  phone: string | null;
+  account: {
+    type: string;
+    status: string;
+    employee_id: string | null;
+  };
+  meta: {
+    create_date: string;
+    update_date: string;
+    is_active: boolean;
+  };
+  extra: any | null;
+};

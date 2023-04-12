@@ -13,12 +13,15 @@ import {
 import { StageCenter } from './components/StageCenter';
 import { BsGoogle } from 'react-icons/bs';
 
+import { createUser } from 'utils/dbUtils';
+
 import { auth } from 'utils/firebase-init';
 
 import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithRedirect,
+  createUserWithEmailAndPassword,
 } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
@@ -26,6 +29,17 @@ const provider = new GoogleAuthProvider();
 const GoogleLogin = async () => {
   try {
     signInWithPopup(auth, provider).then(result => {
+      createUser(
+        result.user.uid,
+        result.user.email ? result.user.email : 'no email',
+        result.user.displayName
+          ? result.user.displayName.split(' ')[0]
+          : 'no name',
+        result.user.displayName ? result.user.displayName.split(' ')[1] : null,
+        null,
+        null,
+        null,
+      );
       // emptyUser(result.user.uid, result.user.displayName, result.user.email);
       console.log(result);
     });
@@ -41,7 +55,15 @@ export function SignUp() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(firstName, email, password);
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+        createUser(user.uid, email, firstName, null, null, null, null);
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
   };
 
   return (

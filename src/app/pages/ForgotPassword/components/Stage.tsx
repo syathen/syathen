@@ -10,16 +10,14 @@ export const Stage = styled.div`
   display: flex;
   align-items: center;
   padding: 0rem 1rem;
-  margin-top: 4rem !important;
   ${media.mobile} {
     border-radius: 0;
     top: 0;
     display: inline-flex;
     position: absolute;
     margin: 0;
-    padding: 0;
   }
-  ${media.small} {
-    padding: 0rem 1rem;
+  ${media.medium} {
+    margin: 0 3rem;
   }
 `;

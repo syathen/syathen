@@ -17,6 +17,21 @@ export const DayView = styled.div`
     width: 100%;
     margin: 0px;
   }
+  ${media.mobile} {
+    padding: 0.5rem 0;
+    width: 100%;
+    margin: 0;
+    font-size: smaller;
+  }
+  ${media.small} {
+    font-size: initial;
+  }
+  ${media.medium} {
+    padding: 1rem 1rem 0.5rem 1rem;
+    margin: 1rem 1rem;
+    width: calc(60% - 2rem);
+    font-size: initial;
+  }
 `;
 
 export const Header = styled.table`

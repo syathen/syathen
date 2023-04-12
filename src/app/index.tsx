@@ -17,6 +17,7 @@ import { Booking } from './pages/Booking/Loadable';
 import { Dashboard } from './pages/Dashboard/Loadable';
 import { SignUp } from './pages/SignUp/Loadable';
 import { SignIn } from './pages/SignIn/Loadable';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { NotFoundPage } from './pages/NotFoundPage/Loadable';
 import { useTranslation } from 'react-i18next';
 
@@ -36,6 +37,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/:handle/book" element={<Booking />} />
         <Route path="/dashboard/:slug" element={<Dashboard />} />
         <Route path="*" element={<NotFoundPage />} />

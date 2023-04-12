@@ -19,15 +19,17 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 
 const provider = new GoogleAuthProvider();
 
 const GoogleLogin = async () => {
   try {
-    signInWithPopup(auth, provider).then(result => {
+    signInWithPopup(auth, provider).then(userCredential => {
+      const user = userCredential.user;
       // emptyUser(result.user.uid, result.user.displayName, result.user.email);
-      console.log(result);
+      console.log(user);
     });
   } catch (e) {
     console.log(e);
@@ -41,6 +43,15 @@ export function SignIn() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(email, password);
+    signInWithEmailAndPassword(auth, email, password)
+      .then(userCredential => {
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch(error => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
   };
 
   return (

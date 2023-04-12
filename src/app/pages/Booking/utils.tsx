@@ -1,6 +1,7 @@
 import { Card as HorzCardComponent } from './components/CardHorizontal';
 import { Card as VertCardComponent } from './components/CardVertical';
 import { Card as TimePill } from './components/TimePill';
+import { ReactComponent as Dark } from '../../public/syathen_dark.svg';
 
 import { getImage } from 'utils/bookingUtils';
 
@@ -18,16 +19,12 @@ export const MapLocations = (
     if (!location.is_active) {
       return null;
     }
-    location.image_id =
-      'https://firebasestorage.googleapis.com/v0/b/syathen-dbc18.appspot.com/o/Dark.PNG?alt=media&token=e296dbb2-3f31-4b73-bfc4-fe488963b4ab';
+    location.image_id = '/syathen_dark.jpeg';
     getImage('services/serviceImages', location.image_id)
       .then(res => {
         location.image_id = res;
       })
-      .catch(err => {
-        location.image_id =
-          'https://firebasestorage.googleapis.com/v0/b/syathen-dbc18.appspot.com/o/Dark.PNG?alt=media&token=e296dbb2-3f31-4b73-bfc4-fe488963b4ab';
-      });
+      .catch(err => {});
     return (
       <HorzCardComponent
         key={location.location_id}
@@ -56,6 +53,7 @@ export const MapPeople = (
     if (!person.is_active) {
       return null;
     }
+    person.image_id = '/syathen_dark.jpeg';
     getImage('services/serviceImages', person.image_id)
       .then(res => {
         person.image_id = res;
@@ -92,10 +90,10 @@ export const MapServices = (
     if (!service.is_active) {
       return null;
     }
+    service.image_id = '/syathen_dark.jpeg';
     getImage('services/serviceImages', service.image_id)
       .then(res => {
         service.image = res;
-        // service.image = `https://firebasestorage.googleapis.com/v0/b/syathen-dbc18-services/o/serviceImages%2F${service.image_id}_200x200.webp?alt=media&token=${res.token}`;
       })
       .catch(err => {
         console.log(err);

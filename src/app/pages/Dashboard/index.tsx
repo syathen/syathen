@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 import { Title } from './components/Title';
 import { Stage } from './components/Stage';
@@ -8,6 +10,8 @@ import { Form, FormField } from './components/Form';
 import { DayView, Appointments, Header } from './components/DayView';
 import { MapAppointments } from './utils';
 import { getBookingsByLocation } from 'utils/bookingUtils';
+
+import { NavBar } from './components/NavBar';
 
 const testbookings = [
   {
@@ -84,10 +88,31 @@ const testbookings = [
   },
 ];
 
+async function getLocations(companyId: string) {
+  const response = await axios.get(
+    `https://api.syathen.com/locations/${companyId}/`,
+  );
+  const data = await response.data;
+  return data;
+}
+
 export default function Dashboard(): JSX.Element {
+  const { slug } = useParams<{ slug: string }>();
+
   const [timeFormat, setTimeFormat] = React.useState<string>('12');
   const [nameFormat, setNameFormat] = React.useState<string>('asc');
   const [timeSort, setTimeSort] = React.useState<string>('asc');
+
+  const loading = React.useRef<boolean>(false);
+
+  const [locations, setLocations] = React.useState<any>(null);
+  const [location, setLocation] = React.useState<string>('');
+
+  const locationCallback = (e: any) => {
+    if (location !== e) {
+      setLocation(e);
+    }
+  };
 
   const swapSort = (state: any, setState: any) => {
     if (state === 'asc') {
@@ -100,12 +125,26 @@ export default function Dashboard(): JSX.Element {
   const [bookings, setBookings] = React.useState<any>(null);
 
   React.useEffect(() => {
+    if (slug) {
+      if (!locations && !loading.current) {
+        loading.current = true;
+        getLocations(slug).then(data => {
+          if (data) {
+            setLocations(data);
+            setLocation(data[0].location_id);
+          }
+          loading.current = false;
+        });
+      }
+    }
     const getBookings = async () => {
-      const data = await getBookingsByLocation('7NyADXL4tRCE6dJYfaMZ');
+      const data = await getBookingsByLocation(location);
       setBookings(data);
     };
-    getBookings();
-  }, []);
+    if (location) {
+      getBookings();
+    }
+  }, [location, locations, slug]);
 
   return (
     <>
@@ -113,6 +152,7 @@ export default function Dashboard(): JSX.Element {
         <title>Dashboard</title>
         <meta name="description" content="View your buisness dashboard." />
       </Helmet>
+      <NavBar {...{ location, locations, locationCallback }} />
       <Stage>
         <DayView title="Today">
           <Header>
@@ -140,7 +180,6 @@ export default function Dashboard(): JSX.Element {
               MapAppointments(
                 bookings.sort((a, b) => {
                   if (timeSort === 'asc') {
-                    console.log(a.details);
                     return a.details.time.time.localeCompare(b.time);
                   } else {
                     return b.details.time.time.localeCompare(a.time);
