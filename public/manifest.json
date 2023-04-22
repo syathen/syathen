@@ -1,15 +1,16 @@
 {
   "short_name": "syathen",
   "name": "syathen",
+  "description": "Manage your bookings and appointments with syathen.",
   "icons": [
     {
       "src": "syathen_light.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "32x32",
       "type": "image/x-icon"
     },
     {
       "src": "syathen_dark.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "32x32",
       "type": "image/x-icon"
     },
     {
@@ -20,6 +21,11 @@
     {
       "src": "syathen_dark.jpeg",
       "type": "image/jpeg",
+      "sizes": "729x729"
+    },
+    {
+      "src": "syathen_dark.png",
+      "type": "image/png",
       "sizes": "729x729"
     }
   ],
