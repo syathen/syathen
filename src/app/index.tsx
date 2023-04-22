@@ -21,8 +21,18 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { NotFoundPage } from './pages/NotFoundPage/Loadable';
 import { useTranslation } from 'react-i18next';
 
+import { auth } from 'utils/firebase-init';
+
 export function App() {
   const { i18n } = useTranslation();
+  const [user, setUser] = React.useState<any>(null);
+  React.useEffect(() => {
+    if (auth.currentUser) {
+      if (!user) {
+        setUser(auth.currentUser);
+      }
+    }
+  }, [user]);
   return (
     <BrowserRouter>
       <Helmet
@@ -39,7 +49,11 @@ export function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/:handle/book" element={<Booking />} />
-        <Route path="/dashboard/:slug" element={<Dashboard />} />
+        {user?.uid ? (
+          <Route path="/dashboard/:slug" element={<Dashboard />} />
+        ) : (
+          <Route path="/dashboard/:slug" element={<SignIn />} />
+        )}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <GlobalStyle />
