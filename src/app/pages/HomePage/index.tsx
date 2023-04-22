@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet-async';
 import { NavBar } from 'app/components/NavBar';
-import { Title } from './components/Title';
 import { P } from './components/P';
 import { PageWrapper } from 'app/components/PageWrapper';
 

@@ -3,17 +3,26 @@ import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { messages } from './messages';
+import moment from 'moment';
+import dayjs from 'dayjs';
 import axios from 'axios';
 
-import { BookingModel } from 'utils/model';
 import { NotFoundPage } from '../NotFoundPage/Loadable';
+import { DropArrow } from './components/TimePill';
+import { TbArrowBigUpFilled } from 'react-icons/tb';
 
-import { Title } from './components/Title';
+import { CalendarPage, CalendarContainer } from './Calendar/Calendar';
+import { Title, P, HR, Bold } from './components/Title';
 import { Stage } from './components/Stage';
 import { StageCenter } from './components/StageCenter';
-import { Form, FormField } from './components/Form';
+import { Form, FormField, FormButton, BackButton } from './components/Form';
 import { MapLocations, MapPeople, MapServices, MapTimes } from './utils';
-import { scheduleBooking, getCompanyAlias, getImage } from 'utils/bookingUtils';
+import {
+  scheduleBooking,
+  getCompanyAlias,
+  generateTimeSlots,
+} from 'utils/bookingUtils';
+import { FormLabel, FormSubHeading } from 'app/components/FormLabel';
 
 // 1st Screen with locations (skipped if only one location)
 // 2nd Screen with Professionals (skipped if only one professional)
@@ -22,75 +31,6 @@ import { scheduleBooking, getCompanyAlias, getImage } from 'utils/bookingUtils';
 // 5th Screen with Customer Details (name, email, phone) (skipped if not configured)
 // 6th Screen with Payment Details (card details, paypal, etc) (skipped if not configured)
 // 7th Screen with Confirmation
-
-const TimeList = {
-  time: [
-    {
-      id: 1,
-      time: '9:00 AM',
-    },
-    {
-      id: 2,
-      time: '9:30 AM',
-    },
-    {
-      id: 3,
-      time: '10:00 AM',
-    },
-    {
-      id: 4,
-      time: '10:30 AM',
-    },
-    {
-      id: 5,
-      time: '11:00 AM',
-    },
-    {
-      id: 6,
-      time: '11:30 AM',
-    },
-    {
-      id: 7,
-      time: '12:00 PM',
-    },
-    {
-      id: 8,
-      time: '12:30 PM',
-    },
-    {
-      id: 9,
-      time: '1:00 PM',
-    },
-    {
-      id: 10,
-      time: '1:30 PM',
-    },
-    {
-      id: 11,
-      time: '2:00 PM',
-    },
-    {
-      id: 12,
-      time: '2:30 PM',
-    },
-    {
-      id: 13,
-      time: '3:00 PM',
-    },
-    {
-      id: 14,
-      time: '3:30 PM',
-    },
-    {
-      id: 15,
-      time: '4:00 PM',
-    },
-    {
-      id: 16,
-      time: '4:30 PM',
-    },
-  ],
-};
 
 let orderDetails = {
   location: { location_id: '', currency_symbol: '$' },
@@ -143,11 +83,16 @@ export default function Booking(): JSX.Element {
   const { handle } = useParams<{ handle: string }>();
 
   const notFound = React.useRef<boolean>(false);
+  const failed = React.useRef<boolean>(false);
+  const [success, setSuccess] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string>('');
+  const [collapsed, setCollapsed] = React.useState<boolean>(false);
 
   const [companyId, setCompanyId] = React.useState<any>(null);
   const [locationList, setLocationList] = React.useState<any>(null);
   const [peopleList, setPeopleList] = React.useState<any>(null);
   const [serviceList, setServiceList] = React.useState<any>(null);
+  const [timeList, setTimeList] = React.useState<any>(null);
 
   const [locationSelection, setLocationSelection] = React.useState<any>(null);
   const [personSelection, setPersonSelection] = React.useState<any>(null);
@@ -175,8 +120,32 @@ export default function Booking(): JSX.Element {
     [setPersonSelection],
   );
 
+  const setDate = React.useCallback((date: any) => {
+    setDateSelection(date);
+    setCollapsed(false);
+    setTimeSelection(null);
+  }, []);
+
+  const failureCallback = React.useCallback(
+    (error: boolean, message: string) => {
+      failed.current = error;
+      (document.getElementById('submit') as any).disabled = false;
+      (document.getElementById('submit') as any).value = 'Book';
+      (document.getElementById('submit') as any).style.opacity = '1';
+      if (error) {
+        (document.getElementById('error') as any).style.display = 'block';
+        setError(message);
+      } else {
+        (document.getElementById('error') as any).style.display = 'none';
+        setSuccess(true);
+      }
+    },
+    [],
+  );
+
   React.useEffect(() => {
     if (!companyId) {
+      failed.current = false;
       if (handle) {
         getCompanyAlias(handle)
           .then(compId => {
@@ -258,6 +227,7 @@ export default function Booking(): JSX.Element {
     }
   }, [
     companyId,
+    dateSelection,
     handle,
     locationList,
     locationSelection,
@@ -266,6 +236,28 @@ export default function Booking(): JSX.Element {
     serviceList,
     serviceSelection,
   ]);
+
+  React.useEffect(() => {
+    if (personSelection && dateSelection) {
+      generateTimeSlots(
+        `${dayjs(dateSelection).format('YYYY-MM')}`,
+        `${dayjs(dateSelection).format('DD')}`,
+        personSelection.employee_id
+          ? personSelection.employee_id
+          : personSelection.id,
+      ).then(res => {
+        if (res) {
+          setTimeList(res);
+          if (res.length > 0) {
+            console.log('Setting time selection');
+            setCollapsed(true);
+          } else {
+            setCollapsed(false);
+          }
+        }
+      });
+    }
+  }, [dateSelection, personSelection]);
 
   if (!notFound.current) {
     return (
@@ -278,84 +270,223 @@ export default function Booking(): JSX.Element {
 
         {notFound.current && <NotFoundPage />}
 
-        {companyId && locationList && !locationSelection && (
+        {companyId && locationList && !locationSelection && !success && (
           <Stage>
             <Title>Where are you looking for?</Title>
             {MapLocations(locationList, setLocation, orderDetails)}
           </Stage>
         )}
 
-        {companyId && locationSelection && peopleList && !personSelection && (
-          <Stage>
-            <Title>Who are you looking for?</Title>
-            {MapPeople(peopleList, setPerson, orderDetails)}
-          </Stage>
-        )}
-
-        {companyId && personSelection && serviceList && !serviceSelection && (
-          <Stage>
-            <Title>What are you looking for?</Title>
-            {MapServices(serviceList, setServiceSelection, orderDetails)}
-          </Stage>
-        )}
-
-        {companyId && locationSelection && personSelection && serviceSelection && (
-          <Stage>
-            <Title>Book your appointment</Title>
-            <Form>
-              <FormField>
-                <label htmlFor="date">Date</label>
-                <input
-                  type="date"
-                  name="date"
-                  id="date"
-                  onChange={e => setDateSelection(e.target.value)}
-                />
-              </FormField>
-              <FormField>
-                <label htmlFor="time">Time</label>
-                <input type="time" name="time" id="time" />
-              </FormField>
-              <FormField>
-                <label htmlFor="name">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  onChange={e => {
-                    customerSelection.name = e.target.value;
-                    setCustomerSelection(customerSelection);
+        {companyId &&
+          locationSelection &&
+          peopleList &&
+          !personSelection &&
+          !success && (
+            <>
+              <Stage>
+                <Title>Who are you looking for?</Title>
+                {MapPeople(peopleList, setPerson, orderDetails)}
+              </Stage>
+              {locationList.length && locationList.length > 1 && (
+                <BackButton
+                  onClick={() => {
+                    setLocationSelection(null);
+                    setLocationList(null);
+                    setPersonSelection(null);
+                    setPeopleList(null);
                   }}
-                />
-              </FormField>
-              <FormField>
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  onChange={e => setEmailSelection(e.target.value)}
-                />
-              </FormField>
-            </Form>
-            <input
-              type="submit"
-              value="Book"
-              onClick={() => {
-                scheduleBooking(
-                  companyId,
-                  locationSelection,
-                  personSelection,
-                  serviceSelection,
-                  customerSelection,
-                  dateSelection,
-                  timeSelection,
-                );
-              }}
-            />
-            <StageCenter>
-              {MapTimes(TimeList.time, setTimeSelection, orderDetails)}
-            </StageCenter>
+                >
+                  {`< Back`}
+                </BackButton>
+              )}
+            </>
+          )}
+
+        {companyId &&
+          personSelection &&
+          serviceList &&
+          !serviceSelection &&
+          !success && (
+            <>
+              <Stage>
+                <Title>What are you looking for?</Title>
+                {MapServices(serviceList, setServiceSelection, orderDetails)}
+              </Stage>
+              <BackButton
+                onClick={() => {
+                  if (
+                    peopleList.length === 1 ||
+                    peopleList.length === undefined
+                  ) {
+                    setLocationSelection(null);
+                    setLocationList(null);
+                    setPersonSelection(null);
+                    setPeopleList(null);
+                    setServiceSelection(null);
+                    setServiceList(null);
+                  } else {
+                    setPersonSelection(null);
+                    setPeopleList(null);
+                    setServiceSelection(null);
+                    setServiceList(null);
+                  }
+                }}
+              >
+                {`< Back`}
+              </BackButton>
+            </>
+          )}
+
+        {companyId &&
+          locationSelection &&
+          personSelection &&
+          serviceSelection &&
+          !success && (
+            <>
+              <Stage>
+                <Title>Book your appointment</Title>
+                <Form>
+                  <div className="left">
+                    <FormField>
+                      <label htmlFor="name">Name</label>
+                      <input
+                        required
+                        type="text"
+                        name="name"
+                        id="name"
+                        onChange={e => {
+                          customerSelection.name = e.target.value;
+                          setCustomerSelection(customerSelection);
+                        }}
+                      />
+                    </FormField>
+                    <FormField>
+                      <label htmlFor="email">Email</label>
+                      <input
+                        required
+                        type="email"
+                        name="email"
+                        id="email"
+                        onChange={e => setEmailSelection(e.target.value)}
+                      />
+                    </FormField>
+                  </div>
+                  <div className="right">
+                    <CalendarContainer>
+                      <CalendarPage
+                        clicked={setDate}
+                        collapsed={collapsed}
+                        setCollapsed={setCollapsed}
+                      />
+                      <HR />
+                      {timeList && dateSelection && (
+                        <>
+                          <FormSubHeading onClick={() => setCollapsed(true)}>
+                            {dayjs(dateSelection).format('dddd, MMMM D')}
+                            {timeSelection && (
+                              <>
+                                {' '}
+                                at{' '}
+                                {dayjs(
+                                  `${dateSelection} ${timeSelection}`,
+                                ).format('h:mm A')}
+                                {!collapsed && (
+                                  <DropArrow>
+                                    <TbArrowBigUpFilled />
+                                  </DropArrow>
+                                )}
+                              </>
+                            )}
+                          </FormSubHeading>
+                        </>
+                      )}
+                      <StageCenter>
+                        {MapTimes(
+                          timeList,
+                          setTimeSelection,
+                          timeSelection,
+                          orderDetails,
+                          dateSelection,
+                          collapsed,
+                          setCollapsed,
+                        )}
+                      </StageCenter>
+                    </CalendarContainer>
+                    <HR />
+                    <StageCenter
+                      style={{
+                        color: 'red',
+                        display: 'none',
+                        textAlign: 'center',
+                      }}
+                      id="error"
+                    >
+                      {error}
+                    </StageCenter>
+                    <FormButton
+                      type="submit"
+                      value="Book"
+                      id="submit"
+                      onClick={() => {
+                        (
+                          document.getElementById('error') as any
+                        ).style.display = 'none';
+                        (document.getElementById('submit') as any).disabled =
+                          true;
+                        (document.getElementById('submit') as any).value =
+                          'Loading...';
+                        (
+                          document.getElementById('submit') as any
+                        ).style.opacity = '0.5';
+                        scheduleBooking(
+                          companyId,
+                          locationSelection,
+                          personSelection,
+                          serviceSelection,
+                          customerSelection,
+                          dateSelection,
+                          timeSelection,
+                          failureCallback,
+                        );
+                      }}
+                    />
+                  </div>
+                </Form>
+              </Stage>
+              <BackButton
+                onClick={() => {
+                  console.log(serviceList.length);
+                  if (
+                    serviceList.length === 1 ||
+                    serviceList.length === undefined
+                  ) {
+                    setPersonSelection(null);
+                    setPeopleList(null);
+                    setServiceSelection(null);
+                    setServiceList(null);
+                  } else {
+                    setServiceSelection(null);
+                    setServiceList(null);
+                  }
+                }}
+              >
+                {`< Back`}
+              </BackButton>
+            </>
+          )}
+        {success && (
+          <Stage>
+            <Title>Success!</Title>
+            <HR />
+            <P>
+              Your appointment has been booked for{' '}
+              <Bold>
+                {dayjs(`${dateSelection} ${timeSelection}`).format('h:mm A')}
+              </Bold>{' '}
+              on <Bold>{dayjs(dateSelection).format('MMMM D YYYY')}</Bold>. You
+              will receive an email confirmation shortly. {'\n'}Thank you for
+              choosing <Bold>{handle}</Bold>!
+            </P>
           </Stage>
         )}
       </>

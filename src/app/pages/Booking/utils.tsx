@@ -1,7 +1,15 @@
+import React from 'react';
+import moment from 'moment';
+import dayjs from 'dayjs';
+import { TbArrowBigUpFilled } from 'react-icons/tb';
+
 import { Card as HorzCardComponent } from './components/CardHorizontal';
 import { Card as VertCardComponent } from './components/CardVertical';
-import { Card as TimePill } from './components/TimePill';
+import { TimePill, NoTime, DropArrow } from './components/TimePill';
 import { ReactComponent as Dark } from '../../public/syathen_dark.svg';
+
+import styled from 'styled-components/macro';
+import { media } from 'styles/media';
 
 import { getImage } from 'utils/bookingUtils';
 
@@ -49,14 +57,26 @@ export const MapPeople = (
   setPersonSelection: any,
   orderDetails: any,
 ) => {
+  if (people[0].employee_id !== '1') {
+    people.unshift({
+      employee_id: '1',
+      first_name: 'Any',
+      image_id: '/syathen_light.jpeg',
+      services: ['1', '2', '3'],
+      meta: {
+        is_active: true,
+      },
+    });
+  }
   return people.map((person: any) => {
-    if (!person.is_active) {
+    if (!person.meta.is_active) {
       return null;
     }
-    person.image_id = '/syathen_dark.jpeg';
-    getImage('services/serviceImages', person.image_id)
+    getImage('people/portraits', `${person.image_id}`)
       .then(res => {
-        person.image_id = res;
+        if (res) {
+          (document.getElementById(person.employee_id) as any).src = res;
+        }
       })
       .catch(err => {
         console.log(err);
@@ -69,7 +89,11 @@ export const MapPeople = (
           orderDetails.person = person;
         }}
       >
-        <img src={person.image_id} alt={person.first_name} />
+        <img
+          src="/syathen_dark.jpeg"
+          alt={person.first_name}
+          id={person.employee_id}
+        />
         <div className="info">
           <h1 className="name">
             {person.first_name} {person.last_name}
@@ -91,13 +115,13 @@ export const MapServices = (
       return null;
     }
     service.image_id = '/syathen_dark.jpeg';
-    getImage('services/serviceImages', service.image_id)
-      .then(res => {
-        service.image = res;
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    // getImage('services/serviceImages', service.image_id)
+    //   .then(res => {
+    //     service.image = res;
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
     return (
       <HorzCardComponent
         key={service.serviceId}
@@ -120,23 +144,68 @@ export const MapServices = (
 export const MapTimes = (
   times: Array<any>,
   setTimeSelection: any,
+  timesSelection: any,
   orderDetails: any,
+  dateSelection: any,
+  collapsed: boolean,
+  setCollapsed: any,
 ) => {
-  return times.map((time: any) => {
+  if (!times) {
     return (
-      <TimePill
-        key={time.id}
-        onClick={() => {
-          setTimeSelection(time);
-          orderDetails.time = time;
-        }}
-      >
-        <div className="info">
-          <h1 className="name">{time.time}</h1>
-        </div>
-      </TimePill>
+      <NoTime className="info">
+        <h1 className="name">Pick a date.</h1>
+      </NoTime>
     );
-  });
+  }
+  if (times.length === 0) {
+    return (
+      <NoTime className="info">
+        <h1 className="name">No availabiltiy for this date.</h1>
+      </NoTime>
+    );
+  }
+  if (collapsed) {
+    return times.map((time: any) => {
+      return (
+        <TimePill
+          key={time}
+          id={`${dateSelection}-${time}`}
+          className="time"
+          onClick={(e: any) => {
+            Array.from(document.getElementsByClassName('time')).forEach(el => {
+              el.classList.remove('timeSelected');
+            });
+            (
+              document.getElementById(`${dateSelection}-${time}`) as any
+            ).classList.add('timeSelected');
+            setTimeSelection(time);
+            orderDetails.time = time;
+          }}
+        >
+          <div className="info">
+            <h1 className="name">
+              {dayjs(`${dateSelection} ${time}`).format('h:mm A')}
+            </h1>
+          </div>
+        </TimePill>
+      );
+    });
+  } else {
+    if (!timesSelection) {
+      return (
+        <NoTime
+          className="time"
+          onClick={() => {
+            setCollapsed(true);
+          }}
+        >
+          <div className="info">
+            <h1 className="name">Pick a time.</h1>
+          </div>
+        </NoTime>
+      );
+    }
+  }
 };
 
 export const mapAvailableDates = (dates: Array<any>, setDateSelection: any) => {

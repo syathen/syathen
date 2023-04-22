@@ -14,10 +14,11 @@ export const Stage = styled.div`
     border-radius: 0;
     top: 0;
     display: inline-flex;
-    position: absolute;
+    /* position: absolute; */
     margin: 0;
   }
   ${media.medium} {
-    margin: 0 3rem;
+    /* margin: 0 3rem; */
+    padding: 0 3rem;
   }
 `;

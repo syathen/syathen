@@ -3,13 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { NavBar } from 'app/components/NavBar';
 import { Title } from './components/Title';
 import { SubTitle } from './components/SubTitle';
-import {
-  Form,
-  FormCheckbox,
-  FormSection,
-  FormLabel,
-  FormLink,
-} from './components/FormField';
+import { Form, FormSection, FormLink } from './components/FormField';
 import { StageCenter } from './components/StageCenter';
 import { BsGoogle } from 'react-icons/bs';
 
@@ -18,7 +12,6 @@ import { auth } from 'utils/firebase-init';
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithRedirect,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 

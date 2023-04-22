@@ -10,7 +10,6 @@ export const StageCenter = styled.div`
   align-self: flex-start;
   max-height: 40vh;
   overflow-y: scroll;
-  border-bottom: 1px solid ${p => p.theme.border};
   ${media.mobile} {
     margin: 0;
     width: 100%;
@@ -18,11 +17,8 @@ export const StageCenter = styled.div`
   }
   ${media.small} {
     margin: 0 auto;
-    width: 80%;
-    padding: 0 1rem;
   }
   ${media.medium} {
     margin: 0 auto;
-    width: 50%;
   }
 `;

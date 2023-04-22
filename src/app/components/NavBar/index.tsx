@@ -39,6 +39,7 @@ const PageWrapper = styled.div`
   ${media.medium} {
     margin: 0 auto;
     max-width: 1100px;
+  }
 `;
 
 const Wrapper = styled.header`

@@ -5,9 +5,7 @@ import { Title } from './components/Title';
 import { SubTitle } from './components/SubTitle';
 import {
   Form,
-  FormCheckbox,
   FormSection,
-  FormLabel,
   FormLink,
 } from './components/FormField';
 import { StageCenter } from './components/StageCenter';
@@ -20,7 +18,6 @@ import { auth } from 'utils/firebase-init';
 import {
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithRedirect,
   createUserWithEmailAndPassword,
 } from 'firebase/auth';
 

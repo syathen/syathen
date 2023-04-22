@@ -1,7 +1,5 @@
-import * as React from 'react';
 import styled from 'styled-components/macro';
 import { media } from 'styles/media';
-import { Logo } from './Logo';
 import { StyleConstants } from 'styles/StyleConstants';
 import { Nav } from './Nav';
 import { DropdownComponent } from '../Dropdown';
@@ -26,8 +24,9 @@ const PageWrapper = styled.div`
     padding: 0.5rem;
   }
   ${media.medium} {
-    margin: 0 auto;
-    max-width: 1100px;
+    margin: 0 1.5rem;
+    width: 100%;
+    max-width: 1300px;
   }
 `;
 

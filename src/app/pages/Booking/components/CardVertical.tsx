@@ -7,7 +7,7 @@ export const Card = styled.div`
   border: 2px solid ${p => p.theme.border};
   color: ${p => p.theme.text};
   border-radius: 1rem;
-  margin: 0.5rem 1rem;
+  margin: 0.5rem 0.5rem;
   display: block;
   text-align: left;
   :hover,
@@ -16,7 +16,7 @@ export const Card = styled.div`
     background-color: ${p => p.theme.backgroundVariant};
   }
   ${media.mobile} {
-    width: calc(50% - 2rem);
+    width: calc(50% - 1rem);
     text-align: center;
     display: block;
     .info {

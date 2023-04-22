@@ -6,7 +6,7 @@ export const DayView = styled.div`
   padding: 1rem 1rem 0.5rem 1rem;
   margin: 1rem 1rem;
   min-height: 20rem;
-  width: calc(60% - 2rem);
+  width: 100%;
   float: right;
   border-radius: 1rem;
   border: 1px solid ${p => p.theme.backgroundVariant};
@@ -18,9 +18,9 @@ export const DayView = styled.div`
     margin: 0px;
   }
   ${media.mobile} {
-    padding: 0.5rem 0;
-    width: 100%;
-    margin: 0;
+    padding: 0.5rem 0.5rem;
+    width: calc(100%-1rem);
+    margin: 0 0.5;
     font-size: smaller;
   }
   ${media.small} {
@@ -67,13 +67,14 @@ export const Header = styled.table`
 `;
 
 export const Appointments = styled.div`
-  overflow: scroll;
+  overflow: auto;
   width: 100%;
   max-height: calc(20rem + 20px);
   transform: translateY(-10px);
 `;
 
 export const Appointment = styled.table`
+  z-index: 2;
   display: inline-flex;
   flex-direction: row;
   min-height: 3rem;
@@ -105,6 +106,33 @@ export const Appointment = styled.table`
       &:first-child {
         width: 50%;
       }
+    }
+  }
+`;
+export const DateSeperator = styled.table`
+  display: inline-flex;
+  flex-direction: row;
+  min-height: 1rem;
+  width: inherit;
+  margin-top: 0px;
+  color: ${p => p.theme.text};
+  tbody {
+    width: 100%;
+  }
+  tr {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+    width: inherit;
+    td {
+      z-index: -1;
+      transform: translateY(3px);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+      width: 100%;
     }
   }
 `;

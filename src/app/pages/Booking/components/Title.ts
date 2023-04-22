@@ -15,3 +15,24 @@ export const Title = styled.h1`
     margin: 10px 0.5rem !important;
   }
 `;
+
+export const P = styled.p`
+  width: calc(100%-6rem);
+  font-size: 1rem;
+  margin: 0rem;
+  color: ${p => p.theme.text};
+`;
+
+export const HR = styled.hr`
+  width: 100%;
+  min-width: 200px;
+  height: 1px;
+  background-color: ${p => p.theme.textSecondary};
+  border: none;
+  margin: 2px auto;
+  margin-bottom: 1rem;
+`;
+
+export const Bold = styled.span`
+  font-weight: 600;
+`;

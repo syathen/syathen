@@ -1,7 +1,7 @@
 import styled from 'styled-components/macro';
 import { media } from 'styles/media';
 
-export const Card = styled.div`
+export const TimePill = styled.div`
   width: calc(50% - 1rem);
   margin: 0.2rem 0.5rem;
   background-color: ${p => p.theme.background};
@@ -29,11 +29,15 @@ export const Card = styled.div`
   .info {
     align-items: center;
     display: inline-block;
-    margin: 0.5rem;
+    margin: 0.5rem 0;
     vertical-align: top !important;
-    max-width: 60%;
+    max-width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
+    .timeSelected {
+      background: ${p => p.theme.promptRed} !important;
+      color: ${p => p.theme.background} !important;
+    }
   }
   h1 {
     margin: 0;
@@ -62,5 +66,53 @@ export const Card = styled.div`
     border-radius: 0.8rem;
     vertical-align: unset !important;
     object-fit: cover;
+  }
+`;
+
+export const NoTime = styled.div`
+  width: 100%;
+  max-width: 400px;
+  margin: 0.5rem auto;
+  margin-top: 0;
+  background-color: ${p => p.theme.background};
+  border: 2px solid ${p => p.theme.border};
+  color: ${p => p.theme.text};
+  border-radius: 0.5rem;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  h1 {
+    margin: 0 auto;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .info {
+    align-items: center;
+    display: inline-block;
+    margin: 0 auto;
+    vertical-align: top !important;
+    max-width: 60%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
+export const DropArrow = styled.div`
+  flex-direction: row;
+  float: right;
+  /* align-items: center;
+  justify-content: center; */
+  min-height: 2rem;
+  max-width: 2rem;
+  cursor: pointer;
+  svg {
+    stroke-width: 2px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1/1;
+    color: ${p => p.theme.text};
   }
 `;

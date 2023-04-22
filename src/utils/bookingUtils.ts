@@ -2,6 +2,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  updateDoc,
   getDocs,
   query,
   collection,
@@ -9,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { UlidMonotonic } from 'id128';
+import moment from 'moment';
 
 import { db, currentUserId } from './firebase-init';
 import { BookingModel } from './model';
@@ -58,6 +60,7 @@ export async function scheduleBooking(
   customer: any,
   date: Date,
   time: Date,
+  failureCallback: any,
 ) {
   const ulid = UlidMonotonic.generate();
   const booking: BookingModel = {
@@ -116,11 +119,84 @@ export async function scheduleBooking(
       },
     },
   };
-  await setDoc(doc(db, 'bookings', ulid.toRaw()), booking)
-    .then(() => {})
-    .catch(e => {
-      console.log(e);
-    });
+
+  const scheduleDocRef = doc(
+    db,
+    'schedule',
+    `${employee.employee_id}_${moment(date).format('YYYY-MM')}`,
+  );
+  const scheduleDoc = await getDoc(scheduleDocRef);
+  let scheduleData = scheduleDoc.data() || {};
+  let exists = false;
+  let error = false;
+  if (!customer) {
+    failureCallback(true, 'Missing customer info');
+    exists = true;
+    error = true;
+  } else {
+    switch (true) {
+      case !location:
+        console.log('Missing location');
+        failureCallback(true, 'Missing location');
+        exists = true;
+        error = true;
+        break;
+      case !employee:
+        console.log('Missing employee');
+        failureCallback(true, 'Missing employee');
+        exists = true;
+        error = true;
+        break;
+      case !service:
+        console.log('Missing service');
+        failureCallback(true, 'Missing service');
+        exists = true;
+        error = true;
+        break;
+      case !(date as any):
+        console.log('Missing date');
+        failureCallback(true, 'Missing date');
+        exists = true;
+        error = true;
+        break;
+      case !(time as any):
+        console.log('Missing time');
+        failureCallback(true, 'Missing time');
+        exists = true;
+        error = true;
+        break;
+    }
+    if (!error) {
+      for (let i in scheduleData[moment(date).format('DD')].bookings) {
+        if (
+          scheduleData[moment(date).format('DD')].bookings[i].time === time &&
+          scheduleData[moment(date).format('DD')].bookings[i].duration ===
+            service.duration &&
+          scheduleData[moment(date).format('DD')].bookings[i].booking_id !==
+            ulid.toRaw()
+        ) {
+          console.log('Booking already exists');
+          exists = true;
+          failureCallback(true, 'Booking already exists');
+          return false;
+        }
+      }
+      if (!exists) {
+        scheduleData[`${moment(date).format('DD')}`].bookings.push({
+          time: time,
+          duration: service.duration || 0,
+          booking_id: ulid.toRaw(),
+        });
+        await updateDoc(scheduleDocRef, scheduleData);
+        await setDoc(doc(db, 'bookings', ulid.toRaw()), booking)
+          .then(() => {})
+          .catch(e => {
+            console.log(e);
+          });
+        failureCallback(false, 'Booking created');
+      }
+    }
+  }
 }
 
 export async function getEmployeeListByCompany(companyId) {
@@ -258,4 +334,114 @@ export async function getImage(path, imageId) {
   );
   let url = await getDownloadURL(storageRef);
   return url;
+}
+
+export async function generateTimeSlots(
+  month: string,
+  day: string,
+  employeeId: string,
+) {
+  // Need to account for length of appointments so that they don't overlap
+  function addMinutes(timeString: string, minutes: number): string {
+    // Screw type safety
+    const totalMinutes = +timeToMinutes(timeString) + +minutes;
+    return minutesToTime(totalMinutes);
+  }
+
+  function timeToMinutes(timeString: string): number {
+    const [hours, minutes] = timeString.split(':').map(s => parseInt(s, 10));
+    return hours * 60 + minutes;
+  }
+
+  function minutesToTime(minutes: number): string {
+    const hour = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+
+    return `${hour.toString().padStart(2, '0')}:${minute
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
+  // Get the employee's schedule document for the given month
+  const scheduleDocRef = doc(db, 'schedule', `${employeeId}_${month}`);
+  const scheduleDoc = await getDoc(scheduleDocRef);
+  const scheduleData = scheduleDoc.data() || {};
+
+  const dayData = scheduleData[day];
+
+  const totalSlots = 24 * 4;
+  const allSlots = Array.from({ length: totalSlots }, (_, i) => i);
+
+  let availableSlots = [...allSlots];
+
+  if (!dayData) {
+    return [];
+  }
+  availableSlots = availableSlots.filter(
+    slot =>
+      !allSlots
+        .slice(
+          0,
+          Math.ceil(timeToMinutes(dayData.start_time) / 15)
+            ? Math.ceil(timeToMinutes('09:00') / 15)
+            : undefined,
+        )
+        .includes(slot),
+  );
+
+  availableSlots = availableSlots.filter(
+    slot =>
+      !allSlots
+        .slice(
+          Math.ceil(timeToMinutes(dayData.end_time) / 15),
+          Math.ceil(timeToMinutes('24:00') / 15)
+            ? Math.ceil(timeToMinutes('24:00') / 15)
+            : undefined,
+        )
+        .includes(slot),
+  );
+
+  if (dayData.bookings) {
+    dayData.bookings.forEach(booking => {
+      const startTime = booking.time;
+      const endTime = addMinutes(startTime, booking.duration);
+
+      const startSlot = Math.floor(timeToMinutes(startTime) / 15);
+      const endSlot = Math.ceil(timeToMinutes(endTime) / 15);
+      const occupiedSlots = allSlots.slice(
+        startSlot,
+        endSlot ? endSlot : undefined,
+      );
+      availableSlots = availableSlots.filter(
+        slot => !occupiedSlots.includes(slot),
+      );
+    });
+  }
+  if (dayData.breaks) {
+    dayData.breaks.forEach(booking => {
+      const startTime = booking.time;
+      const endTime = addMinutes(startTime, booking.duration);
+
+      const startSlot = Math.floor(timeToMinutes(startTime) / 15);
+      const endSlot = Math.ceil(timeToMinutes(endTime) / 15);
+      const occupiedSlots = allSlots.slice(
+        startSlot,
+        endSlot ? endSlot : undefined,
+      );
+      availableSlots = availableSlots.filter(
+        slot => !occupiedSlots.includes(slot),
+      );
+    });
+  }
+
+  function slotToTime(slot: number): string {
+    const hour = Math.floor(slot / 4);
+    const minute = (slot % 4) * 15;
+    return `${hour.toString().padStart(2, '0')}:${minute
+      .toString()
+      .padStart(2, '0')}`;
+  }
+
+  const availableTimes = availableSlots.map(slot => slotToTime(slot));
+  return availableTimes;
 }

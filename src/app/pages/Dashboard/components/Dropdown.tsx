@@ -2,7 +2,6 @@ import styled from 'styled-components/macro';
 
 export function DropdownComponent(props) {
   const { location, locations, locationCallback } = props;
-
   function DropDownItem(locationItem) {
     return (
       <DropdownItem
@@ -34,13 +33,14 @@ export function DropdownComponent(props) {
 
 const Dropdown = styled.select`
   position: relative;
+  appearance: none;
   display: inline-block;
   min-width: 15rem;
   max-width: 100%;
   max-height: 3rem;
   padding: 0.5rem;
   border: none;
-  background-color: ${p => p.theme.background};
+  background-color: ${p => p.theme.backgroundVariant};
   color: ${p => p.theme.text};
   font-size: 1rem;
   border: 1px solid ${p => p.theme.border};
@@ -49,21 +49,6 @@ const Dropdown = styled.select`
 
 const DropdownItem = styled.option`
   display: block;
-  width: 100%;
-  height: 100%;
-  background-color: ${p => p.theme.background};
-  color: ${p => p.theme.text};
-  font-size: 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  cursor: pointer;
-  &:hover {
-    background-color: ${p => p.theme.border};
-  }
-`;
-
-const DropdownButton = styled.button`
   width: 100%;
   height: 100%;
   background-color: ${p => p.theme.background};
