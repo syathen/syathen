@@ -3,14 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { NavBar } from 'app/components/NavBar';
 import { Title } from './components/Title';
 import { SubTitle } from './components/SubTitle';
-import {
-  Form,
-  FormSection,
-  FormLink,
-} from './components/FormField';
+import { Form, FormSection, FormLink } from './components/FormField';
 import { StageCenter } from './components/StageCenter';
 import { BsGoogle } from 'react-icons/bs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavigateFunction } from 'react-router-dom';
 
 import { createUser } from 'utils/dbUtils';
 
@@ -24,7 +20,7 @@ import {
 
 const provider = new GoogleAuthProvider();
 
-const GoogleLogin = async (navigate: any) => {
+const GoogleLogin = async (navigate: NavigateFunction) => {
   try {
     signInWithPopup(auth, provider).then(result => {
       createUser(
@@ -38,7 +34,6 @@ const GoogleLogin = async (navigate: any) => {
         null,
         null,
       );
-      // emptyUser(result.user.uid, result.user.displayName, result.user.email);
       navigate('/dashboard');
     });
   } catch (e) {
