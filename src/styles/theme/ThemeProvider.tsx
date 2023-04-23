@@ -8,8 +8,7 @@ import { themes } from './themes';
 export const ThemeProvider = (props: { children: React.ReactNode }) => {
   useThemeSlice();
 
-  // const theme = useSelector(selectTheme);
-  const theme = themes.dark;
+  const theme = useSelector(selectTheme);
   return (
     <OriginalThemeProvider theme={theme}>
       {React.Children.only(props.children)}

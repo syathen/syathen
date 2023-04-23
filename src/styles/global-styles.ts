@@ -1,5 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 import { StyleConstants } from './StyleConstants';
+import styled from 'styled-components/macro';
+
 /* istanbul ignore next */
 export const GlobalStyle = createGlobalStyle`
   html,
@@ -12,9 +14,21 @@ export const GlobalStyle = createGlobalStyle`
 
   body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    /* padding-top: ${StyleConstants.NAV_BAR_HEIGHT}; */
     background-color: ${p => p.theme.background};
+    overflow: overlay;
   }
+
+    ::-webkit-scrollbar {
+       width: 10px;
+       /* background: transparent; */
+       background: ${p => p.theme.background};
+    }
+
+    ::-webkit-scrollbar-thumb {
+       background: ${p => p.theme.textSecondary};
+       border: 1px solid ${p => p.theme.background};
+       border-radius: 5px;
+    }
 
   body.fontLoaded {
     font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;

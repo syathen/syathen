@@ -1,7 +1,3 @@
-/**
- * Asynchronously loads the component for HomePage
- */
-
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { lazyLoad } from 'utils/loadable';
@@ -17,9 +13,9 @@ const LoadingWrapper = styled.div`
   justify-content: center;
 `;
 
-const Dashboard = lazyLoad(
+const Soon = lazyLoad(
   () => import('./index'),
-  module => module.default,
+  module => module.Soon,
   {
     fallback: (
       <LoadingWrapper>
@@ -29,7 +25,7 @@ const Dashboard = lazyLoad(
   },
 );
 
-export const DashboardWrapper = () => {
+export const SoonWrapper = () => {
   const history = useNavigate();
 
   useEffect(() => {
@@ -40,7 +36,7 @@ export const DashboardWrapper = () => {
     });
   }, [history]);
 
-  return <Dashboard />;
+  return <Soon />;
 };
 
 // export default DashboardWrapper;
