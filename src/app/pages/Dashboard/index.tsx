@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 
@@ -13,6 +13,8 @@ import { MapAppointments } from './utils';
 import { getBookingsByLocation, getCompanyAlias } from 'utils/bookingUtils';
 
 import { NavBar } from './components/NavBar';
+
+import { auth } from 'utils/firebase-init';
 
 async function getLocations(companyId: string) {
   const response = await axios.get(
@@ -42,6 +44,18 @@ function findClosestAppointment(appointments, targetDateString, setJumpTo) {
 
 export default function Dashboard(): JSX.Element {
   const { slug } = useParams<{ slug: string }>();
+
+  const history = useNavigate();
+
+  // useEffect(() => {
+  //   auth.onAuthStateChanged(user => {
+  //     if (!user) {
+  //       setLoggedIn(false);
+  //     } else {
+  //       setLoggedIn(true);
+  //     }
+  //   });
+  // }, [history]);
 
   const [companyId, setCompanyId] = React.useState<string>('');
 

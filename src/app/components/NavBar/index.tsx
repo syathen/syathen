@@ -1,13 +1,15 @@
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components/macro';
+import { useNavigate } from 'react-router-dom';
 import { media } from 'styles/media';
 import { Logo } from './Logo';
 import { StyleConstants } from 'styles/StyleConstants';
 import { Nav } from './Nav';
+import { auth } from 'utils/firebase-init';
 
 export function NavBar() {
-  const [login, setLogin] = React.useState(false);
-  // const [loggedin, setLoggedIn] = React.useState(false);
+  const [login, setLogin] = useState(false);
+  const [loggedin, setLoggedIn] = useState(false);
   if (
     window.location.pathname === '/signin' ||
     window.location.pathname === '/signup'
@@ -16,11 +18,29 @@ export function NavBar() {
       setLogin(true);
     }
   }
+
+  const history = useNavigate();
+
+  useEffect(() => {
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        setLoggedIn(false);
+      } else {
+        setLoggedIn(true);
+      }
+    });
+  }, [history]);
+
   return (
     <Wrapper>
       <PageWrapper>
         <Logo />
-        {!login && <Nav />}
+        {!login && !loggedin && <Nav />}
+        {loggedin && window.location.pathname !== '/dashboard' && (
+          <DashboardButton onClick={() => history('/dashboard')}>
+            Dashboard
+          </DashboardButton>
+        )}
       </PageWrapper>
     </Wrapper>
   );
@@ -65,5 +85,29 @@ const Wrapper = styled.header`
     display: flex;
     /* align-items: center; */
     justify-content: space-between;
+  }
+`;
+
+const DashboardButton = styled.a`
+  color: ${p => p.theme.background};
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  height: 2rem;
+  padding: 0.5rem;
+  margin: 1rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-items: center;
+  background-color: ${p => p.theme.promptRed};
+  border-radius: 0.5rem;
+
+  ${media.small} {
+    margin: 1rem 0.5rem;
+    padding: 0.5rem;
+  }
+
+  &:hover {
+    opacity: 0.8;
   }
 `;

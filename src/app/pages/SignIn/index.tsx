@@ -7,6 +7,8 @@ import { Form, FormSection, FormLink } from './components/FormField';
 import { StageCenter } from './components/StageCenter';
 import { BsGoogle } from 'react-icons/bs';
 
+import { useNavigate } from 'react-router-dom';
+
 import { auth } from 'utils/firebase-init';
 
 import {
@@ -17,12 +19,12 @@ import {
 
 const provider = new GoogleAuthProvider();
 
-const GoogleLogin = async () => {
+const GoogleLogin = async (navigate: any) => {
   try {
     signInWithPopup(auth, provider).then(userCredential => {
       const user = userCredential.user;
       // emptyUser(result.user.uid, result.user.displayName, result.user.email);
-      console.log(user);
+      navigate('/dashboard');
     });
   } catch (e) {
     console.log(e);
@@ -33,13 +35,15 @@ export function SignIn() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(email, password);
     signInWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
         const user = userCredential.user;
-        console.log(user);
+        navigate('/dashboard');
       })
       .catch(error => {
         const errorCode = error.code;
@@ -88,7 +92,7 @@ export function SignIn() {
           <button
             className="google"
             onClick={() => {
-              GoogleLogin();
+              GoogleLogin(navigate);
             }}
           >
             {' '}

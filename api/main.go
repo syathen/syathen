@@ -37,11 +37,15 @@ type Employee struct {
 	LastName   string   `json:"last_name"`
 	EmployeeID string   `json:"employee_id"`
 	Email      string   `json:"email"`
-	Active     bool     `json:"active"`
 	Service    []string `json:"services"`
 	CompanyID  string   `json:"company_id"`
 	LocationID string   `json:"location_id"`
 	Image      string   `json:"image_id"`
+	Meta       struct {
+		LastUpdated string `json:"last_updated"`
+		CreatedDate string `json:"created_date"`
+		Active      bool   `json:"active"`
+	} `json:"meta"`
 }
 
 var projectID = "syathen-dbc18"

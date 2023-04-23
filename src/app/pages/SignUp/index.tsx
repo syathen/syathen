@@ -10,6 +10,7 @@ import {
 } from './components/FormField';
 import { StageCenter } from './components/StageCenter';
 import { BsGoogle } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
 
 import { createUser } from 'utils/dbUtils';
 
@@ -23,7 +24,7 @@ import {
 
 const provider = new GoogleAuthProvider();
 
-const GoogleLogin = async () => {
+const GoogleLogin = async (navigate: any) => {
   try {
     signInWithPopup(auth, provider).then(result => {
       createUser(
@@ -38,7 +39,7 @@ const GoogleLogin = async () => {
         null,
       );
       // emptyUser(result.user.uid, result.user.displayName, result.user.email);
-      console.log(result);
+      navigate('/dashboard');
     });
   } catch (e) {
     console.log(e);
@@ -50,12 +51,15 @@ export function SignUp() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     createUserWithEmailAndPassword(auth, email, password)
       .then(userCredential => {
         const user = userCredential.user;
         createUser(user.uid, email, firstName, null, null, null, null);
+        navigate('/dashboard');
       })
       .catch(error => {
         const errorCode = error.code;
@@ -147,7 +151,7 @@ export function SignUp() {
           <button
             className="google"
             onClick={() => {
-              GoogleLogin();
+              GoogleLogin(navigate);
             }}
           >
             {' '}
