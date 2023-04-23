@@ -12,8 +12,8 @@
         "source": "**",
         "destination": "/index.html"
       }, {
+        "source": "/api/**",
         "run": {
-          "source": "/api/**",
           "serviceId": "api",
           "region": "us-east1"
         }
