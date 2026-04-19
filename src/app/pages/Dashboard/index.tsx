@@ -1,20 +1,17 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 
 import { Stage } from './components/Stage';
-import { StageCenter } from './components/StageCenter';
-import { Form, FormField } from './components/Form';
 import { DayView, Appointments, Header } from './components/DayView';
 import { Book } from './components/Schedule';
+import { BookingDetail } from './components/BookingDetail';
 import { MapAppointments } from './utils';
 import { getBookingsByLocation, getCompanyAlias } from 'utils/bookingUtils';
 
 import { NavBar } from './components/NavBar';
-
-import { auth } from 'utils/firebase-init';
 
 async function getLocations(companyId: string) {
   const response = await axios.get(
@@ -45,18 +42,6 @@ function findClosestAppointment(appointments, targetDateString, setJumpTo) {
 export default function Dashboard(): JSX.Element {
   const { slug } = useParams<{ slug: string }>();
 
-  const history = useNavigate();
-
-  // useEffect(() => {
-  //   auth.onAuthStateChanged(user => {
-  //     if (!user) {
-  //       setLoggedIn(false);
-  //     } else {
-  //       setLoggedIn(true);
-  //     }
-  //   });
-  // }, [history]);
-
   const [companyId, setCompanyId] = React.useState<string>('');
 
   const [timeFormat, setTimeFormat] = React.useState<string>('12');
@@ -67,6 +52,8 @@ export default function Dashboard(): JSX.Element {
 
   const [locations, setLocations] = React.useState<any>(null);
   const [location, setLocation] = React.useState<string>('');
+
+  const [selectedBooking, setSelectedBooking] = React.useState<any>(null);
 
   const locationCallback = (e: any) => {
     if (location !== e) {
@@ -86,7 +73,10 @@ export default function Dashboard(): JSX.Element {
   const [bookings, setBookings] = React.useState<any>(null);
   const [jumpTo, setJumpTo] = React.useState<string>('');
 
-  // terrible use of useEffect, but it "works"
+  const refreshBookings = React.useCallback(() => {
+    setBookings(null);
+  }, []);
+
   React.useEffect(() => {
     if (slug) {
       getCompanyAlias(slug)
@@ -132,6 +122,12 @@ export default function Dashboard(): JSX.Element {
     }
   }, [bookings, companyId, jumpTo, location, locations, slug]);
 
+  const locationName = React.useMemo(() => {
+    if (!locations || !location) return 'Bookings';
+    const loc = locations.find((l: any) => l.location_id === location);
+    return loc?.name || 'Bookings';
+  }, [locations, location]);
+
   return (
     <>
       <Helmet titleTemplate="%s - brand">
@@ -140,7 +136,7 @@ export default function Dashboard(): JSX.Element {
       </Helmet>
       <NavBar {...{ location, locations, locationCallback }} />
       <Stage>
-        <DayView title="Today">
+        <DayView title={locationName}>
           <Header>
             <tbody>
               <tr>
@@ -157,6 +153,8 @@ export default function Dashboard(): JSX.Element {
                   Name
                 </th>
                 <th title="Services">Services</th>
+                <th title="Employee">Employee</th>
+                <th title="Status">Status</th>
               </tr>
             </tbody>
           </Header>
@@ -183,12 +181,29 @@ export default function Dashboard(): JSX.Element {
                   }),
                 timeFormat,
                 nameFormat,
+                setSelectedBooking,
               )}
           </Appointments>
         </DayView>
 
-        {slug && <Book key={location} {...{ slug, location, locations }} />}
+        {slug && (
+          <Book
+            key={location}
+            slug={slug}
+            location={location}
+            locations={locations}
+            onBookingCreated={refreshBookings}
+          />
+        )}
       </Stage>
+
+      {selectedBooking && (
+        <BookingDetail
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          onStatusChange={refreshBookings}
+        />
+      )}
     </>
   );
 }

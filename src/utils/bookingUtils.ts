@@ -306,6 +306,38 @@ export async function getServiceList(companyId) {
   return serviceList;
 }
 
+export async function updateBookingStatus(bookingId: string, status: string) {
+  await updateDoc(doc(db, 'bookings', bookingId), {
+    'meta.status': status,
+    'meta.update_date': new Date().toUTCString(),
+  });
+}
+
+export async function cancelBooking(
+  bookingId: string,
+  employeeId: string,
+  date: Date,
+) {
+  await updateBookingStatus(bookingId, 'cancelled');
+
+  const scheduleDocRef = doc(
+    db,
+    'schedule',
+    `${employeeId}_${moment(date).format('YYYY-MM')}`,
+  );
+  const scheduleDoc = await getDoc(scheduleDocRef);
+  const scheduleData = scheduleDoc.data();
+  if (scheduleData) {
+    const day = moment(date).format('DD');
+    if (scheduleData[day]?.bookings) {
+      scheduleData[day].bookings = scheduleData[day].bookings.filter(
+        (b: any) => b.booking_id !== bookingId,
+      );
+      await updateDoc(scheduleDocRef, scheduleData);
+    }
+  }
+}
+
 export async function getBookingsByLocation(location_id) {
   const bookingRef = query(
     collection(db, 'bookings'),

@@ -12,6 +12,7 @@ interface meta {
   update_date: string;
   is_active: boolean | true;
   booking_type?: string;
+  status?: string;
 }
 
 interface extra {

@@ -1,4 +1,4 @@
-import { Appointment, DateSeperator } from './components/DayView';
+import { Appointment, DateSeperator, StatusBadge } from './components/DayView';
 
 const formatHours = (time: any, format: string) => {
   if (time === undefined) {
@@ -36,6 +36,7 @@ export const MapAppointments = (
   appointments: Array<any>,
   timeFormat: string,
   nameFormat: string,
+  onBookingClick?: (booking: any) => void,
 ) => {
   if (appointments.length === 0) {
     return (
@@ -70,6 +71,15 @@ export const MapAppointments = (
         }
       }
     };
+    const employee = () => {
+      return appointment.details?.employee?.employee_name || '';
+    };
+    const status = appointment.meta?.status || 'pending';
+
+    const handleClick = () => {
+      if (onBookingClick) onBookingClick(appointment);
+    };
+
     if (appointment.details.date !== appointments[index - 1]?.details.date) {
       const date = new Date(appointment.details.date).toLocaleString(
         'default',
@@ -79,7 +89,6 @@ export const MapAppointments = (
           day: 'numeric',
         },
       );
-      // Big rerender issue here
       return (
         <>
           <DateSeperator
@@ -97,13 +106,17 @@ export const MapAppointments = (
               </tr>
             </tbody>
           </DateSeperator>
-          <Appointment key={appointment.booking_id}>
+          <Appointment key={appointment.booking_id} onClick={handleClick}>
             <tbody>
               <tr>
                 <td title={time()}>{time()}</td>
                 <td title={name()}>{name()}</td>
                 <td title={appointment.details.service.service_name}>
                   {appointment.details.service.service_name}
+                </td>
+                <td title={employee()}>{employee()}</td>
+                <td>
+                  <StatusBadge $status={status}>{status}</StatusBadge>
                 </td>
               </tr>
             </tbody>
@@ -112,13 +125,17 @@ export const MapAppointments = (
       );
     }
     return (
-      <Appointment key={appointment.booking_id}>
+      <Appointment key={appointment.booking_id} onClick={handleClick}>
         <tbody>
           <tr>
             <td title={time()}>{time()}</td>
             <td title={name()}>{name()}</td>
             <td title={appointment.details.service.service_name}>
               {appointment.details.service.service_name}
+            </td>
+            <td title={employee()}>{employee()}</td>
+            <td>
+              <StatusBadge $status={status}>{status}</StatusBadge>
             </td>
           </tr>
         </tbody>

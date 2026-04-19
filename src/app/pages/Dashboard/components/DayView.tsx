@@ -19,8 +19,8 @@ export const DayView = styled.div`
   }
   ${media.mobile} {
     padding: 0.5rem 0.5rem;
-    width: calc(100%-1rem);
-    margin: 0 0.5;
+    width: calc(100% - 1rem);
+    margin: 0 0.5rem;
     font-size: smaller;
   }
   ${media.small} {
@@ -60,7 +60,7 @@ export const Header = styled.table`
       width: 100%;
       cursor: pointer;
       &:first-child {
-        width: 50%;
+        width: 30%;
       }
     }
   }
@@ -69,8 +69,9 @@ export const Header = styled.table`
 export const Appointments = styled.div`
   overflow: auto;
   width: 100%;
-  max-height: calc(20rem + 20px);
+  max-height: calc(100vh - 16rem);
   transform: translateY(-10px);
+  scrollbar-width: thin;
 `;
 
 export const Appointment = styled.table`
@@ -85,6 +86,7 @@ export const Appointment = styled.table`
   padding: 0.75rem;
   border-radius: 0.5rem;
   color: ${p => p.theme.text};
+  cursor: pointer;
   :hover {
     background-color: ${p => p.theme.border};
   }
@@ -104,7 +106,7 @@ export const Appointment = styled.table`
       text-align: left;
       width: 100%;
       &:first-child {
-        width: 50%;
+        width: 30%;
       }
     }
   }
@@ -135,4 +137,25 @@ export const DateSeperator = styled.table`
       width: 100%;
     }
   }
+`;
+
+export const StatusBadge = styled.span<{ $status?: string }>`
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.5rem;
+  text-transform: capitalize;
+  background-color: ${p => {
+    switch (p.$status) {
+      case 'confirmed':
+      case 'completed':
+        return p.theme.promptGreen;
+      case 'cancelled':
+      case 'no-show':
+        return p.theme.promptRed;
+      default:
+        return p.theme.primary;
+    }
+  }};
+  color: ${p => p.theme.background};
 `;
